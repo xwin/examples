@@ -22,25 +22,19 @@ from keras.layers import *
 from keras.regularizers import l2
 from keras.models import Model
 
+from keras import backend as K
 
 def preprocess(x):
   x = (x + 0.8) / 7.0
   x = K.clip(x, -5, 5)
   return x
 
-
 def preprocess_raw(x):
   return x
-
 
 Preprocess = Lambda(preprocess)
 
 PreprocessRaw = Lambda(preprocess_raw)
-
-
-def relu6(x):
-  return K.relu(x, max_value=6)
-
 
 def conv_1d_time_stacked_model(input_size=16000, num_classes=11):
   """ Creates a 1D model for temporal data.
@@ -68,7 +62,7 @@ def conv_1d_time_stacked_model(input_size=16000, num_classes=11):
         kernel_regularizer=l2(0.00001))(
             x)
     x = BatchNormalization()(x)
-    x = Activation(relu6)(x)
+    x = ReLU(max_value=6.0)(x)
     x = MaxPool1D(pool_size=3, strides=strides, padding=padding)(x)
     return x
 
@@ -82,7 +76,7 @@ def conv_1d_time_stacked_model(input_size=16000, num_classes=11):
         use_bias=False)(
             x)
     x = BatchNormalization()(x)
-    x = Activation(relu6)(x)
+    x = ReLU(max_value=6.0)(x)
     return x
 
   x = _context_conv(x, 32, 1)

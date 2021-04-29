@@ -17,14 +17,14 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
+from keras.models import load_model
 
-keras_model = "../conv_1d_time_stacked_model/ep-084-vl-0.2595.hdf5"
-input_arrays = ["the_input"]
-output_arrays = ["the_output"]
+keras_model = "../checkpoints/conv_1d_time_stacked_model/ep-098.hdf5"
+
+model = load_model(keras_model)
 
 converter = tf.lite.TFLiteConverter
-converter = converter.from_keras_model_file(keras_model, input_arrays,
-                                            output_arrays)
+converter = converter.from_keras_model(model)
 tflite_model = converter.convert()
-open("converted_speed_keras_model.tflite", "wb").write(tflite_model)
+open("converted_speech_model.tflite", "wb").write(tflite_model)

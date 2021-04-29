@@ -54,7 +54,7 @@ import argparse
 from keras import backend as K
 from model import conv_1d_time_stacked_model
 from pathlib import Path
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 
 parser = argparse.ArgumentParser(description='set input arguments')
 parser.add_argument(
@@ -90,7 +90,7 @@ parser.add_argument(
     type=str,
     default='output_node')
 parser.add_argument(
-    '-quantize', action='store', dest='quantize', type=bool, default=False)
+    '-quantize', action='store_true', dest='quantize', default=False)
 parser.add_argument(
     '-theano_backend',
     action='store',
@@ -126,7 +126,7 @@ try:
   label_count = 12
   net_model = conv_1d_time_stacked_model(
       fingerprint_size, num_classes=label_count)
-  net_model.load_weights('../conv_1d_time_stacked_model/ep-022-vl-0.2864.hdf5')
+  net_model.load_weights('checkpoints/conv_1d_time_stacked_model/ep-097.hdf5')
 
 except ValueError as err:
   print(
@@ -150,8 +150,8 @@ print('output nodes names are: ', pred_node_names)
 
 # In[ ]:
 
-sess = K.get_session()
-
+#sess = K.get_session()
+sess = tf.compat.v1.keras.backend.get_session()
 if args.graph_def:
   f = args.output_graphdef_file
   tf.io.write_graph(sess.graph.as_graph_def(), output_fld, f, as_text=True)
@@ -163,17 +163,16 @@ if args.graph_def:
 # In[ ]:
 
 if args.quantize:
-  # graph_transforms will not be available for future versions.
-  from tensorflow.compat.v1.tools.graph_transforms import TransformGraph  # pylint: disable=g-import-not-at-top
-  transforms = ['quantize_weights', 'quantize_nodes']
-  transformed_graph_def = TransformGraph(sess.graph.as_graph_def(), [],
-                                         pred_node_names, transforms)
-  constant_graph = tf.graph_util.convert_variables_to_constants(
-      sess, transformed_graph_def, pred_node_names)
+  converter = tf.lite.TFLiteConverter.from_keras_model(net_model)
+  converter.optimizations = [tf.lite.Optimize.DEFAULT]
+  tflite_model = converter.convert()
+  tflite_model_file = Path(args.output_model_file)
+  tflite_model_file.write_bytes(tflite_model)
 else:
   constant_graph = tf.graph_util.convert_variables_to_constants(
       sess, sess.graph.as_graph_def(), pred_node_names)
-tf.io.write_graph(
+  tf.io.write_graph(
     constant_graph, output_fld, args.output_model_file, as_text=False)
+  
 print('saved the freezed graph (ready for inference) at: ',
       str(Path(output_fld) / args.output_model_file))

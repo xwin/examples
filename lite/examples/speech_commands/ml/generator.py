@@ -247,7 +247,7 @@ class AudioProcessor(object):
         frame_step=model_settings['window_stride_samples'],
         fft_length=None)
     self.spectrogram_ = tf.abs(stfts)
-    num_spectrogram_bins = self.spectrogram_.shape[-1].value
+    num_spectrogram_bins = self.spectrogram_.shape[-1]
     lower_edge_hertz, upper_edge_hertz = 80.0, 7600.0
     linear_to_mel_weight_matrix = \
         tf.signal.linear_to_mel_weight_matrix(

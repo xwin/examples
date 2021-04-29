@@ -21,7 +21,8 @@ import argparse
 import os
 
 import tensorflow.compat.v1 as tf
-from keras import backend as K
+from tensorflow.compat.v1.keras import backend as K
+#from keras import backend as K
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau
 from keras.callbacks import TensorBoard
 from callbacks import ConfusionMatrixCallback
@@ -29,6 +30,8 @@ from model import speech_model, prepare_model_settings
 from generator import AudioProcessor, prepare_words_list
 from classes import get_classes
 from utils import data_gen
+
+tf.compat.v1.disable_eager_execution()
 
 parser = argparse.ArgumentParser(description='set input arguments')
 
@@ -119,7 +122,7 @@ if __name__ == '__main__':
           all_words=prepare_words_list(classes),
           label2int=ap.word_to_index),
       ReduceLROnPlateau(
-          monitor='val_categorical_accuracy',
+          monitor='categorical_accuracy',
           mode='max',
           factor=0.5,
           patience=4,
@@ -128,9 +131,9 @@ if __name__ == '__main__':
       TensorBoard(log_dir='logs'),
       ModelCheckpoint(
           os.path.join(checkpoints_path,
-                       'ep-{epoch:03d}-vl-{val_loss:.4f}.hdf5'),
+                       'ep-{epoch:03d}.hdf5'),
           save_best_only=True,
-          monitor='val_categorical_accuracy',
+          monitor='categorical_accuracy',
           mode='max')
   ]
   model.fit_generator(

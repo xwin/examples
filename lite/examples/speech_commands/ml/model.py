@@ -23,6 +23,7 @@ from keras.regularizers import l2
 from keras.models import Model
 
 from keras import backend as K
+import tensorflow as tf
 
 def preprocess(x):
   x = (x + 0.8) / 7.0
@@ -94,8 +95,9 @@ def conv_1d_time_stacked_model(input_size=16000, num_classes=11):
   x = _context_conv(x, 256, 3)
 
   x = Dropout(0.3)(x)
-  x = Conv1D(num_classes, 5, activation='softmax')(x)
-  x = Reshape([-1])(x)
+  x = Conv1D(num_classes, 5)(x)
+  x = Reshape([num_classes])(x)
+  x = Lambda(lambda inp: tf.nn.softmax(inp))(x)
 
   model = Model(input_layer, x, name='conv_1d_time_stacked')
   model.compile(

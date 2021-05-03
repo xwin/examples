@@ -76,7 +76,7 @@ if __name__ == '__main__':
         **model_settings)
 
     checkpoints_path = os.path.join('checkpoints', 'conv_1d_time_stacked_model')
-    model.load_weights(checkpoints_path + '/ep-098.hdf5')
+    model.load_weights(checkpoints_path + '/ep-096.hdf5')
 
     labels = prepare_words_list(classes)
     for file_name in args.file_names :

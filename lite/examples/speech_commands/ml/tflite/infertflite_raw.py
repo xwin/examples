@@ -29,6 +29,11 @@ def dequantize(x, zero_point, scale):
     x = x.astype(np.float32)
     return scale * (x - zero_point)
 
+def do_save_input(wav_file, data):
+    (dirname, filename) = os.path.split(wav_file)
+    (name, ext) = os.path.splitext(filename)
+    data.numpy().tofile(name+".tensor", "\n", format="%f")
+    
 def main(FLAGS, unparsed) :
     model="../export/converted_speech_model.tflite"
     labels="./conv_actions_labels_keras.txt"
@@ -51,6 +56,8 @@ def main(FLAGS, unparsed) :
         audio_samples = tf.expand_dims(audio_samples, axis=0)
         if (isquantized == True) :
             audio_samples = quantize_audio(audio_samples)
+        if (FLAGS.save_input) :
+            do_save_input(file_path, audio_samples)
         interpreter.set_tensor(input_details[0]['index'], audio_samples)
         interpreter.invoke()
 
@@ -65,5 +72,6 @@ def main(FLAGS, unparsed) :
     
 if __name__ == '__main__' :
     parser = argparse.ArgumentParser()
+    parser.add_argument('-save-input', action='store_true', dest='save_input', default=False)
     FLAGS, unparsed = parser.parse_known_args();
     main(FLAGS, unparsed)

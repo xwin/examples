@@ -53,6 +53,8 @@ def main(FLAGS, unparsed) :
     for file_path in unparsed :
         audio_binary = tf.io.read_file(file_path)
         audio_samples = decode_audio(audio_binary)
+        if (audio_samples.shape[0] != 16000) :
+            continue;
         audio_samples = tf.expand_dims(audio_samples, axis=0)
         if (isquantized == True) :
             audio_samples = quantize_audio(audio_samples)

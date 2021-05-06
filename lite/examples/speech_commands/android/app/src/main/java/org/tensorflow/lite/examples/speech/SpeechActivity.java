@@ -457,34 +457,34 @@ public class SpeechActivity extends Activity
                 }
 
                 switch (labelIndex - 2) {
-                  case 0:
+                  case 7:
                     selectedTextView = yesTextView;
                     break;
-                  case 1:
+                  case 9:
                     selectedTextView = noTextView;
                     break;
-                  case 2:
+                  case 4:
                     selectedTextView = upTextView;
                     break;
-                  case 3:
+                  case 1:
                     selectedTextView = downTextView;
                     break;
-                  case 4:
+                  case 8:
                     selectedTextView = leftTextView;
                     break;
-                  case 5:
+                  case 3:
                     selectedTextView = rightTextView;
                     break;
                   case 6:
                     selectedTextView = onTextView;
                     break;
-                  case 7:
+                  case 2:
                     selectedTextView = offTextView;
                     break;
-                  case 8:
+                  case 0:
                     selectedTextView = stopTextView;
                     break;
-                  case 9:
+                  case 5:
                     selectedTextView = goTextView;
                     break;
                 }

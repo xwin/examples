@@ -13,7 +13,7 @@ task downloadAndUnzipFile(dependsOn: downloadZipFile, type: Copy) {
 
 
 task extractModels(type: Copy) {
-    dependsOn downloadAndUnzipFile
+    /*dependsOn downloadAndUnzipFile*/
 }
 
 tasks.whenTaskAdded { task ->

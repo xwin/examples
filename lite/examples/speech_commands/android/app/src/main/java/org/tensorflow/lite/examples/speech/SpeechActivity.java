@@ -392,9 +392,10 @@ public class SpeechActivity extends Activity
     Log.v(LOG_TAG, "Start recognition");
 
     short[] inputBuffer = new short[RECORDING_LENGTH];
-    float[][] floatInputBuffer = new float[RECORDING_LENGTH][1];
+    byte[][] floatInputBuffer = new byte[RECORDING_LENGTH][1];
     float[][] outputScores = new float[1][labels.size()];
     int[] sampleRateList = new int[] {SAMPLE_RATE};
+    byte[][] byteOutputScores = new byte[1][labels.size()];
 
     // Loop, grabbing recorded data and running the recognition model on it.
     while (shouldContinueRecognition) {
@@ -416,12 +417,12 @@ public class SpeechActivity extends Activity
       // We need to feed in float values between -1.0f and 1.0f, so divide the
       // signed 16-bit inputs.
       for (int i = 0; i < RECORDING_LENGTH; ++i) {
-        floatInputBuffer[i][0] = inputBuffer[i] / 32767.0f;
+        floatInputBuffer[i][0] = (byte) (inputBuffer[i] / 255);
       }
 
-      Object[] inputArray = {floatInputBuffer, sampleRateList};
+      Object[] inputArray = {floatInputBuffer};
       Map<Integer, Object> outputMap = new HashMap<>();
-      outputMap.put(0, outputScores);
+      outputMap.put(0, byteOutputScores);
 
       // Run the model.
       tfLiteLock.lock();
@@ -430,7 +431,10 @@ public class SpeechActivity extends Activity
       } finally {
         tfLiteLock.unlock();
       }
-
+      // Dequantize output, hardcode scale=0.00390625 zeropoint=-128
+      for (int i = 0; i < labels.size(); ++i) {
+        outputScores[0][i] = 0.00390625f * ((float) (byteOutputScores[0][i]) - (-128));
+      }
       // Use the smoother to figure out if we've had a real recognition event.
       long currentTime = System.currentTimeMillis();
       final RecognizeCommands.RecognitionResult result =
@@ -566,7 +570,7 @@ public class SpeechActivity extends Activity
       }
       tfLite = new Interpreter(tfLiteModel, tfLiteOptions);
       tfLite.resizeInput(0, new int[] {RECORDING_LENGTH, 1});
-      tfLite.resizeInput(1, new int[] {1});
+/*      tfLite.resizeInput(1, new int[] {1});*/
     } finally {
       tfLiteLock.unlock();
     }

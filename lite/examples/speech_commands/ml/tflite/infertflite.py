@@ -27,21 +27,21 @@ def main(FLAGS, unparsed) :
     output_details = interpreter.get_output_details()
     input_shape = input_details[0]['shape']
 
-    file_path = unparsed[0]
-    audio_binary = tf.io.read_file(file_path)
-    audio_samples, _ = tf.audio.decode_wav(audio_binary)
-    sample_rate = np.array((16000,), dtype=np.int32)
+    for file_path in unparsed :
+        audio_binary = tf.io.read_file(file_path)
+        audio_samples, _ = tf.audio.decode_wav(audio_binary)
+        sample_rate = np.array((16000,), dtype=np.int32)
 
-    interpreter.set_tensor(input_details[0]['index'], audio_samples)
-    interpreter.set_tensor(input_details[1]['index'], sample_rate)
-    interpreter.invoke()
+        interpreter.set_tensor(input_details[0]['index'], audio_samples)
+        interpreter.set_tensor(input_details[1]['index'], sample_rate)
+        interpreter.invoke()
 
-    # output is a softmax of the detected keywords
-    output = interpreter.get_tensor(output_details[0]['index'])
-    output = output.squeeze() * 100
-    result = dict(zip(lablist, output.tolist()))
-    top_pred, top_val = max(result.items(), key=operator.itemgetter(1))
-    print(top_pred, top_val)
+        # output is a softmax of the detected keywords
+        output = interpreter.get_tensor(output_details[0]['index'])
+        output = output.squeeze() * 100
+        result = dict(zip(lablist, output.tolist()))
+        top_pred, top_val = max(result.items(), key=operator.itemgetter(1))
+        print(top_pred, top_val)
     
 if __name__ == '__main__' :
     parser = argparse.ArgumentParser()
